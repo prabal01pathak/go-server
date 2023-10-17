@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,10 +11,12 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
+	"github.com/prabal01pathak/scratch/internal/database"
 )
 
-func httpRequestHandler(writer http.ResponseWriter, request *http.Request) {
-	writer.Write([]byte("Welcome"))
+type apiConfig struct {
+	DB *database.Queries
 }
 
 func main() {
@@ -33,7 +36,23 @@ func main() {
 		AllowCredentials: false,
 		MaxAge:           300,
 	}))
-	router.Get("/", httpRequestHandler)
+	v1Router := chi.NewRouter()
+	v1Router.Get("/healthz", handlerReadiness)
+	v1Router.Get("/err", handlerErr)
+	router.Mount("/v1", v1Router)
+	// router.Get("/", handlerReadiness)
+	dbURL := os.Getenv("DB_URL")
+	if dbURL == "" {
+		log.Fatal("Database url is misssing please add that in the env")
+	}
+	conn, err := sql.Open("postgresql", dbURL)
+	if err != nil {
+		log.Fatal("Error while connecting with the database: ", err)
+	}
+	apiCfg := apiConfig{
+		DB: database.New(conn),
+	}
+	v1Router.Post("/create", apiCfg.handlerUser)
 	srv := &http.Server{
 		Handler: router,
 		Addr:    ":" + port,
