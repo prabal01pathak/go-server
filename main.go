@@ -11,7 +11,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 	"github.com/prabal01pathak/scratch/internal/database"
 )
 
@@ -22,6 +22,8 @@ type apiConfig struct {
 func main() {
 	godotenv.Load()
 	port := os.Getenv("PORT")
+	d := pq.Driver{}
+	fmt.Println(d)
 	if port == "" {
 		log.Fatal("Port is not found in the environment")
 	}
@@ -45,7 +47,8 @@ func main() {
 	if dbURL == "" {
 		log.Fatal("Database url is misssing please add that in the env")
 	}
-	conn, err := sql.Open("postgresql", dbURL)
+	fmt.Printf("db url is: %s", dbURL)
+	conn, err := sql.Open("postgres", dbURL)
 	if err != nil {
 		log.Fatal("Error while connecting with the database: ", err)
 	}

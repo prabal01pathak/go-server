@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/prabal01pathak/scratch/internal/auth"
 	"github.com/prabal01pathak/scratch/internal/database"
 )
 
@@ -31,6 +32,15 @@ func (apiCfg *apiConfig) handlerUser(w http.ResponseWriter, r *http.Request) {
 		respondWithError(w, 400, fmt.Sprintf("Couldn't create the user: %v", userErr))
 		return
 	}
-	respondWithJson(w, 201, user)
+	respondWithJson(w, 201, databaseUsertoUser(user))
 	return
+}
+
+func (apiCfg *apiConfig) handlerGetUser(w http.ResponseWriter, r *http.Request) {
+	apiKey, err := auth.GetAuthHeader(r.Header)
+	if err != nil {
+		respondWithError(w, 403, fmt.Sprintf("Bad Authentication: %v", err))
+		return
+	}
+	fmt.Printf("api key is: %v", apiKey)
 }
