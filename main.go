@@ -56,6 +56,9 @@ func main() {
 		DB: database.New(conn),
 	}
 	v1Router.Post("/create", apiCfg.handlerUser)
+	v1Router.Get("/user", apiCfg.middlewareAuth(apiCfg.handlerGetUser))
+	v1Router.Post("/feeds", apiCfg.middlewareAuth(apiCfg.handlerFeed))
+	v1Router.Get("/feeds", apiCfg.handleGetAllFeed)
 	srv := &http.Server{
 		Handler: router,
 		Addr:    ":" + port,
