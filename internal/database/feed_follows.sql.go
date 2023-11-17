@@ -48,10 +48,11 @@ func (q *Queries) CreateFeedFollow(ctx context.Context, arg CreateFeedFollowPara
 const getAllFeedFollow = `-- name: GetAllFeedFollow :many
 select id, created_at, updated_at, user_id, feed_id
 from feed_follows
+where user_id = $1
 `
 
-func (q *Queries) GetAllFeedFollow(ctx context.Context) ([]FeedFollow, error) {
-	rows, err := q.db.QueryContext(ctx, getAllFeedFollow)
+func (q *Queries) GetAllFeedFollow(ctx context.Context, userID uuid.UUID) ([]FeedFollow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllFeedFollow, userID)
 	if err != nil {
 		return nil, err
 	}
